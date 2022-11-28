@@ -22,16 +22,24 @@ while(iIters <= nIters)
 
     nodeOrder = randperm(nNodes); % which node gets to send data first in iteration
     
+    droppingIterations = [];
+    
     for sNode = nodeOrder
-        iPacketsCreacted = numel(n(sNode).createData());
-        packetsCreated = packetsCreated + iPacketsCreacted;
+        iPacketsCreated = numel(n(sNode).createData());
+        packetsCreated = packetsCreated + iPacketsCreated;
         packetDrop = n(sNode).sendData();
         if(packetDrop)
-            packetsDropped = packetsDropped + iPacketsCreacted;
+            droppingIterations = [droppingIterations iIters];
+            packetsDropped = packetsDropped + iPacketsCreated;
         end
     end
+    
+    iPacketDropFraction = 0;
+    if(packetsCreated ~= 0)
+        iPacketDropFraction = packetsDropped/packetsCreated;
+    end
 
-    packetDropFraction = [packetDropFraction (packetsDropped/packetsCreated)];
+    packetDropFraction = [packetDropFraction iPacketDropFraction];
     avgPacketDropFraction = [avgPacketDropFraction mean(packetDropFraction)];
     
     transmittedData = sChannel.transmitData(); % transmitting data through channel in the simulation time step
